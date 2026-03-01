@@ -1,9 +1,9 @@
-package com.example.tool
+package dev.klerkframework.klerkmcp.tool
 
 import kotlin.test.Test
 
 
-class GenerateFunctionCreateModelTest {
+class GenerateFunctionCreateModelsTest {
 
     @Test
     fun generateFunctionCreateModel() {

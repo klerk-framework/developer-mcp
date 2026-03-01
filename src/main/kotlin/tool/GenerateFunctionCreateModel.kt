@@ -1,30 +1,31 @@
-package com.example.tool
+package dev.klerkframework.klerkmcp.tool
 
-import com.example.CodeSnippet
-import com.example.capFirstLetter
-import com.example.json
+import dev.klerkframework.klerkmcp.CodeSnippet
+import dev.klerkframework.klerkmcp.capFirstLetter
+import dev.klerkframework.klerkmcp.generateFunctionNamePrefix
+import dev.klerkframework.klerkmcp.json
+import dev.klerkframework.klerkmcp.log
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
 
 private const val FUNCTION_NAME = "function_name"
 
 private const val IN_VOID_STATE = "in_void_state"
 
-private const val MODEL_NAME = "model_name"
+const val modelName = "model_name"
 
 private const val PARAMETER_CLASS_NAME = "parameter_class_name"
 
 private const val HAS_PARAMETERS = "has_parameters"
 
-
+const val generateFunctionCreateModel = "${generateFunctionNamePrefix}create_model"
 
 fun addToolGenerateFunctionCreateModel(mcpServer: Server) {
     mcpServer.addTool(
-        name = "generate_function_create_model",
+        name = generateFunctionCreateModel,
         description = "Returns a function with a signature suitable to use in createModel within voidState in a state machine. ",
         inputSchema = ToolSchema(
             properties = buildJsonObject {
@@ -38,7 +39,7 @@ fun addToolGenerateFunctionCreateModel(mcpServer: Server) {
                 })
 
  */
-                put(MODEL_NAME, buildJsonObject {
+                put(modelName, buildJsonObject {
                     put("type", "string")
                     put("description", "The name of the model that the state machine is for.")
                 })
@@ -56,17 +57,17 @@ fun addToolGenerateFunctionCreateModel(mcpServer: Server) {
                  */
             },
           //  required = listOf(FUNCTION_NAME, IN_VOID_STATE, MODEL_NAME, PARAMETER_CLASS_NAME)
-            required = listOf(MODEL_NAME, HAS_PARAMETERS)
+            required = listOf(modelName, HAS_PARAMETERS)
         )
     ) { request ->
-        val modelName = request.arguments?.get(MODEL_NAME)?.jsonPrimitive?.content ?: ""
+        val modelName = request.arguments?.get(modelName)?.jsonPrimitive?.content ?: ""
         val hasParameters = request.arguments?.get(HAS_PARAMETERS)?.jsonPrimitive?.booleanOrNull ?: false
 /*        val functionName = request.arguments?.get(FUNCTION_NAME)?.jsonPrimitive?.content ?: ""
         val inVoidState = request.arguments?.get(IN_VOID_STATE)?.jsonPrimitive?.booleanOrNull ?: false
         val parameterClassName = request.arguments?.get(PARAMETER_CLASS_NAME)?.jsonPrimitive?.content ?: ""
  */
         //generateFunctionCreateModel(modelName, parameterClassName, inVoidState, functionName)
-        generateFunctionCreateModel(modelName, hasParameters)
+        log(generateFunctionCreateModel(modelName, hasParameters))
     }
 }
 
@@ -90,7 +91,7 @@ fun generateFunctionCreateModel(
                     "   TODO()\n" +
                     "}\n",
             imports = listOf("dev.klerkframework.klerk.*"),
-            instructions = "Paste the code into the current file."
+            instructions = "Paste the code into the current file. Make sure the provided import is in the file."
         )
 
     return CallToolResult(content = listOf(TextContent(json.encodeToString(snippet))))

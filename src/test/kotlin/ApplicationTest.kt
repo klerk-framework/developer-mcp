@@ -1,4 +1,4 @@
-package com.example
+package dev.klerkframework.klerkmcp
 
 import io.ktor.client.request.*
 import io.ktor.http.*

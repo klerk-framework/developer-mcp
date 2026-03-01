@@ -1,5 +1,6 @@
-package com.example
+package dev.klerkframework.klerkmcp
 
+import dev.klerkframework.klerkmcp.tool.*
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
 import io.modelcontextprotocol.kotlin.sdk.server.Server
@@ -8,13 +9,15 @@ import io.modelcontextprotocol.kotlin.sdk.types.Implementation
 import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities
 import io.ktor.utils.io.streams.asInput
 import io.modelcontextprotocol.kotlin.sdk.server.StdioServerTransport
-import com.example.tool.addToolGenerateFunctionCreateModel
 import io.modelcontextprotocol.kotlin.sdk.server.mcp
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.asSink
 import kotlinx.io.buffered
 import kotlinx.serialization.json.Json
+import mu.KotlinLogging
+
+private val log = KotlinLogging.logger {}
 
 fun main() {
     val port = System.getenv("KLERK_MCP_PORT")?.toIntOrNull()
@@ -25,13 +28,19 @@ fun main() {
         ),
         options = ServerOptions(
             capabilities = ServerCapabilities(
-                tools = ServerCapabilities.Tools(listChanged = true),
+                tools = ServerCapabilities.Tools(),
+                resources = ServerCapabilities.Resources(),
             ),
         ),
         instructionsProvider = ::provideInstructions
     )
 
+    addToolGetDocumentation(mcpServer)
+    addToolSetupKlerk(mcpServer)
     addToolGenerateFunctionCreateModel(mcpServer)
+    addToolGenerateBasicConfig(mcpServer)
+    addToolGenerateModel(mcpServer)
+    addToolGenerateDataContainer(mcpServer)
 
     if (port != null) {
         startHttp(mcpServer, port)
@@ -72,3 +81,4 @@ fun startStdio(mcpServer: Server) {
 }
 
 val json = Json { prettyPrint = true }
+

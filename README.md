@@ -32,7 +32,7 @@ In IntellJ -> Settings -> Junie -> MCP settings:
 ### HTTP SSE
 This mode is preferred when developing this MCP server itself. This allows you to log and set breakpoints to see how the MCP is used.
 
-Set the environment variable `KLERK_MCP_PORT` to the port you want to use and start the server.
+Set the environment variable `KLERK_MCP_PORT` to the port you want to use (3000 in this case) and start the server.
 
 In IntellJ -> Settings -> Junie -> MCP settings:
 

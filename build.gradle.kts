@@ -2,6 +2,7 @@ val kotlin_version: String by project
 val logback_version: String by project
 val mcpVersion: String by project
 val ktorVersion: String by project
+val kotlin_logging_version: String by project
 
 plugins {
     kotlin("jvm") version "2.3.10"
@@ -9,11 +10,11 @@ plugins {
     kotlin("plugin.serialization") version "2.3.10"
 }
 
-group = "com.example"
+group = "package dev.klerkframework.klerkmcp"
 version = "0.0.1"
 
 application {
-    mainClass = "com.example.ApplicationKt"
+    mainClass = "package dev.klerkframework.klerkmcp.ApplicationKt"
 }
 
 dependencies {
@@ -23,6 +24,7 @@ dependencies {
 
     implementation("io.ktor:ktor-server-core")
     implementation("io.ktor:ktor-server-sse")
+    implementation("io.github.microutils:kotlin-logging-jvm:${kotlin_logging_version}")
     implementation("ch.qos.logback:logback-classic:$logback_version")
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
