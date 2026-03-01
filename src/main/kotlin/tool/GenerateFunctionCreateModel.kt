@@ -4,7 +4,6 @@ import dev.klerkframework.klerkmcp.CodeSnippet
 import dev.klerkframework.klerkmcp.capFirstLetter
 import dev.klerkframework.klerkmcp.generateFunctionNamePrefix
 import dev.klerkframework.klerkmcp.json
-import dev.klerkframework.klerkmcp.log
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
@@ -67,7 +66,7 @@ fun addToolGenerateFunctionCreateModel(mcpServer: Server) {
         val parameterClassName = request.arguments?.get(PARAMETER_CLASS_NAME)?.jsonPrimitive?.content ?: ""
  */
         //generateFunctionCreateModel(modelName, parameterClassName, inVoidState, functionName)
-        log(generateFunctionCreateModel(modelName, hasParameters))
+        generateFunctionCreateModel(modelName, hasParameters)
     }
 }
 

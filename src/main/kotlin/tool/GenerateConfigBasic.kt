@@ -2,7 +2,6 @@ package dev.klerkframework.klerkmcp.tool
 
 import dev.klerkframework.klerkmcp.CodeSnippet
 import dev.klerkframework.klerkmcp.json
-import dev.klerkframework.klerkmcp.log
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
@@ -30,7 +29,7 @@ fun addToolGenerateBasicConfig(mcpServer: Server) {
             request.arguments?.get(modelName)?.jsonPrimitive?.content?.replaceFirstChar { it.uppercaseChar() } ?: error(
                 "No $modelName provided"
             )
-        log(CallToolResult(content = listOf(TextContent(json.encodeToString(createBasicConfigSnippet(model))))))
+        CallToolResult(content = listOf(TextContent(json.encodeToString(createBasicConfigSnippet(model)))))
     }
 }
 

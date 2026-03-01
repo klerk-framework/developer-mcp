@@ -22,7 +22,8 @@ The developer defines her own models by creating data classes that contain prope
 data class Author(
     val firstName: FirstName,
     val lastName: LastName,
-    val phoneNumber: PhoneNumber
+    val phoneNumber: PhoneNumber,
+    val numberOfNobelPrizes: NobelPrizeCount
 )
 
 class FirstName(value: String) : StringContainer(value) {
@@ -43,6 +44,11 @@ class PhoneNumber(value: String) : StringContainer(value) {
     override val maxLines = 1
     override val regexPattern = "/^\\+?[1-9][0-9]{7,14}\$/"
 }
+
+class NobelPrizeCount(value: Int) : IntContainer(value) {
+    override val min = 0
+    override val max = 10
+}
 ```
 
 The properties can also contain references to other models. E.g.:
@@ -51,6 +57,8 @@ data class Book(
     val author: ModelID<Author>
 )
 ```
+Note that all references must be a ModelID<T>, List<ModelID<T>> or Set<ModelID<T>>, so in this case it is not 
+possible for a model to have a field of type Author.
 
 The data classes can have custom validation by overriding validators, e.g.:
 ```kotlin

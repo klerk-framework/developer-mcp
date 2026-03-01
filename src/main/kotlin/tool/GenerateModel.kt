@@ -2,7 +2,6 @@ package dev.klerkframework.klerkmcp.tool
 
 import dev.klerkframework.klerkmcp.CodeSnippet
 import dev.klerkframework.klerkmcp.json
-import dev.klerkframework.klerkmcp.log
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
@@ -95,6 +94,6 @@ fun addToolGenerateModel(mcpServer: Server) {
                 ),
             instructions = "Put this code in a file named '$model.kt' in the package 'models'. Make sure the provided imports are in the file."
         )
-        log(CallToolResult(content = listOf(TextContent(json.encodeToString(generateModelSnippet)))))
+        CallToolResult(content = listOf(TextContent(json.encodeToString(generateModelSnippet))))
     }
 }

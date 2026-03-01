@@ -1,9 +1,7 @@
 package dev.klerkframework.klerkmcp.tool
 
-import dev.klerkframework.klerkmcp.log
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
-import io.modelcontextprotocol.kotlin.sdk.types.ResourceLink
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 
 const val createBasicSetup = "setup_klerk"
@@ -13,12 +11,10 @@ fun addToolSetupKlerk(mcpServer: Server) {
         name = createBasicSetup,
         description = "Setup Klerk: add dependencies, generate a model, generate a basic configuration, and start Klerk.",
     ) { request ->
-        log(
-            CallToolResult(
-                content = listOf(
-                    TextContent(createBasicSetupInstructions),
-                    //  ResourceLink(DocumentationResource.Dependencies.name, DocumentationResource.Dependencies.uri)
-                )
+        CallToolResult(
+            content = listOf(
+                TextContent(createBasicSetupInstructions),
+                //  ResourceLink(DocumentationResource.Dependencies.name, DocumentationResource.Dependencies.uri)
             )
         )
     }
