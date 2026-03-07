@@ -1,7 +1,7 @@
-package dev.klerkframework.klerkmcp
+package dev.klerkframework.devmcp
 
-import dev.klerkframework.klerkmcp.tool.DocumentationResource
-import dev.klerkframework.klerkmcp.tool.getDocumentation
+import dev.klerkframework.devmcp.tool.DocumentationResource
+import dev.klerkframework.devmcp.tool.getDocumentation
 
 fun provideInstructions() = """
 # Klerk Framework — MCP Instructions

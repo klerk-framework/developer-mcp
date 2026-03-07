@@ -1,4 +1,4 @@
-package dev.klerkframework.klerkmcp
+package dev.klerkframework.devmcp
 
 import io.ktor.client.request.*
 import io.ktor.http.*

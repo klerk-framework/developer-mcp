@@ -1,9 +1,9 @@
-package dev.klerkframework.klerkmcp.tool
+package dev.klerkframework.devmcp.tool
 
-import dev.klerkframework.klerkmcp.CodeSnippet
-import dev.klerkframework.klerkmcp.capFirstLetter
-import dev.klerkframework.klerkmcp.generateFunctionNamePrefix
-import dev.klerkframework.klerkmcp.json
+import dev.klerkframework.devmcp.CodeSnippet
+import dev.klerkframework.devmcp.capFirstLetter
+import dev.klerkframework.devmcp.generateFunctionNamePrefix
+import dev.klerkframework.devmcp.json
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent

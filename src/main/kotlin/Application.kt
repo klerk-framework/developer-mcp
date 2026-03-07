@@ -1,6 +1,6 @@
-package dev.klerkframework.klerkmcp
+package dev.klerkframework.devmcp
 
-import dev.klerkframework.klerkmcp.tool.*
+import dev.klerkframework.devmcp.tool.*
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.install
 import io.ktor.server.cio.CIO

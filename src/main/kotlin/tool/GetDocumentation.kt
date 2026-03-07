@@ -1,6 +1,6 @@
-package dev.klerkframework.klerkmcp.tool
+package dev.klerkframework.devmcp.tool
 
-import dev.klerkframework.klerkmcp.tool.DocumentationCategory.*
+import dev.klerkframework.devmcp.tool.DocumentationCategory.*
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent

@@ -18,7 +18,7 @@ In IntellJ -> Settings -> Junie -> MCP settings:
 ```json
 {
   "mcpServers": {
-    "klerk-mcp": {
+    "klerk-dev": {
       "command": "/usr/bin/java",
       "args": [
         "-jar",
@@ -29,7 +29,7 @@ In IntellJ -> Settings -> Junie -> MCP settings:
 }
 ```
 
-### HTTP SSE
+### Streamable HTTP
 This mode is preferred when developing this MCP server itself. This allows you to log and set breakpoints to see how the MCP is used.
 
 Set the environment variable `KLERK_MCP_PORT` to the port you want to use (3000 in this case) and start the server.
@@ -39,10 +39,10 @@ In IntellJ -> Settings -> Junie -> MCP settings:
 ```json
 {
   "mcpServers": {
-    "klerk-mcp": {
-      "type": "sse",
-      "url": "http://localhost:3000/",
-      "note": "For SSE connections, add this URL directly in your MCP Client"
+    "klerk-dev": {
+      "type": "streamable-http",
+      "url": "http://localhost:3000/mcp",
+      "note": "For Streamable HTTP connections, add this URL directly in your MCP Client"
     }
   }
 }

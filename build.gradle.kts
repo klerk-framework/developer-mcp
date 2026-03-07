@@ -10,11 +10,11 @@ plugins {
     kotlin("plugin.serialization") version "2.3.10"
 }
 
-group = "package dev.klerkframework.klerkmcp"
+group = "package dev.klerkframework.devmcp"
 version = "0.0.1"
 
 application {
-    mainClass = "package dev.klerkframework.klerkmcp.ApplicationKt"
+    mainClass = "package dev.klerkframework.devmcp.ApplicationKt"
 }
 
 dependencies {

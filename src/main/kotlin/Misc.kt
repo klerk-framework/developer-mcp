@@ -1,4 +1,4 @@
-package dev.klerkframework.klerkmcp
+package dev.klerkframework.devmcp
 
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import kotlinx.serialization.Serializable

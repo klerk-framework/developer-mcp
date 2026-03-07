@@ -1,4 +1,4 @@
-package dev.klerkframework.klerkmcp.tool
+package dev.klerkframework.devmcp.tool
 
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult

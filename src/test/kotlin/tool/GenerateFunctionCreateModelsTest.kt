@@ -1,4 +1,4 @@
-package dev.klerkframework.klerkmcp.tool
+package dev.klerkframework.devmcp.tool
 
 import kotlin.test.Test
 
