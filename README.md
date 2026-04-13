@@ -1,4 +1,4 @@
-# Klerk MCP
+# Klerk Developer MCP
 
 This is an MCP that improves the developer experience when using AI to build systems with the Klerk framework. 
 

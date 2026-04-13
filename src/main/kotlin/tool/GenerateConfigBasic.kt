@@ -48,16 +48,16 @@ private fun createBasicConfigSnippet(model: String) = CodeSnippet(
             override val translation: Translation = DefaultTranslation,
         ) : KlerkContext
 
-        data class Collections(
+        data class Views(
             val ${model.lowercase()}s: ModelViews<$model, Ctx>,
         )
 
-        fun createConfig(): Config<Ctx, Collections> {
-            val collections = Collections(ModelViews())
-            return ConfigBuilder<Ctx, Collections>(collections).build {
+        fun createConfig(): Config<Ctx, Views> {
+            val views = Views(ModelViews())
+            return ConfigBuilder<Ctx, Views>(views).build {
                 persistence(RamStorage())
                 managedModels {
-                    model($model::class, create${model}StateMachine(), collections.${model.lowercase()}s)
+                    model($model::class, create${model}StateMachine(), views.${model.lowercase()}s)
                 }
                 authorization {
                     insecureAllowEverything()

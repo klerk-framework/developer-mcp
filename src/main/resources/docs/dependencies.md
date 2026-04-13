@@ -20,13 +20,16 @@ If you want to generate a GraphQL API, you also need to add the following depend
 implementation("dev.klerkframework:klerk-graphql")
 ```
 
-You currently also need to add mavenLocal and 'maven ("https://jitpack.io")' to settings.gradle.kts:
+You currently also need to 'maven("https://jitpack.io")' to settings.gradle.kts:
 ```kotlin
 dependencyResolutionManagement {
     repositories {
-        mavenCentral()
-        mavenLocal()
-        maven ("https://jitpack.io")
+        mavenCentral() {
+            content { excludeGroup("dev.klerkframework") }
+        }
+        maven("https://jitpack.io") {
+            content { includeGroup("dev.klerkframework") }
+        }    
     }
 }
 ```

@@ -39,10 +39,10 @@ fun main() {
             ),
         ),
         instructionsProvider = ::provideInstructions,
-
     )
 
     addToolGetDocumentation(mcpServer)
+    addToolDescribeErrorCode(mcpServer)
     addToolSetupKlerk(mcpServer)
     addToolGenerateFunctionCreateModel(mcpServer)
     addToolGenerateBasicConfig(mcpServer)
@@ -58,7 +58,7 @@ fun main() {
 }
 
 fun startHttp(mcpServer: Server, port: Int) {
-    println("Starting server on port $port")
+    println("Starting streaming HTTP server on port $port")
     embeddedServer(CIO, port = port) {
         install(ContentNegotiation) {
             json(McpJson)

@@ -1,6 +1,7 @@
 package dev.klerkframework.devmcp
 
 import dev.klerkframework.devmcp.tool.DocumentationResource
+import dev.klerkframework.devmcp.tool.describeErrorCode
 import dev.klerkframework.devmcp.tool.getDocumentation
 
 fun provideInstructions() = """
@@ -52,9 +53,9 @@ Everything is wired together in a `Config` built with `ConfigBuilder`. The confi
 - **Authorization rules** — positive and negative rules for reading models, reading properties, executing commands, and reading the event log.
 - **Persistence** — `RamStorage` (in-memory, for tests) or `SqlPersistence`.
 
-The configuration is typically built by passing function references to `ConfigBuilder`.
+The configuration is typically built by passing function references to `ConfigBuilder`. Do not use lambdas for the configuration, only use references to named functions.
 
-The configuration is passed when starting the server. This means that the configuration cannot change after the server is started. Klerk is 
+The configuration is used when starting the server. This means that the configuration cannot change after the server is started. Klerk is 
 responsible for upholding all the rules declared in the config. This means that the caller can be confident that the authorization rules are enforced and that
 there will be no data corruption when interacting with Klerk.
 
@@ -117,6 +118,7 @@ Every command that mutates state is recorded. The event log can be queried via `
 - **Context** (`KlerkContext`) carries the actor identity and any request-scoped data needed by authorization rules. It is always passed to `handle()` and `read()`.
 - **`RamStorage`** is the right choice for tests; **`SqlPersistence`** for production.
 - State machine states are defined as a Kotlin `enum class`.
+- When adding a function to the config, use a function reference rather than a lambda. The MCP has tools (names starting with generate_function_) that can help you generate the function signature.
 
 ## Common Mistakes to Avoid
 
@@ -138,5 +140,9 @@ When developing the configuration, you will most likely create at least one func
   there is currently a bug in IntelliJ that prevents this from working.
   2. Use a MCP tool to create the function. There are tools for most of the functions. All these tools have names that starts with "$generateFunctionNamePrefix".
   3. Add a reference in the configuration and then carefully examine which signature is required.
+
+### Runtime errors
+If a problem occurs in Klerk, Klerk will typically throw an error and provide an error code like this: [ERROR-CONFIG-2]. 
+You can use the tool $describeErrorCode to get a description of the error and how to fix it.
 
 """.trimIndent()

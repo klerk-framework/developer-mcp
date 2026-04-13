@@ -3,6 +3,7 @@ val logback_version: String by project
 val mcpVersion: String by project
 val ktorVersion: String by project
 val kotlin_logging_version: String by project
+val klerkVersion: String by project
 
 plugins {
     kotlin("jvm") version "2.3.10"
@@ -19,6 +20,7 @@ application {
 
 dependencies {
     implementation("io.modelcontextprotocol:kotlin-sdk-server:${mcpVersion}")
+    implementation("dev.klerkframework:klerk:${klerkVersion}")
     implementation("io.ktor:ktor-server-netty")
     implementation("io.ktor:ktor-server-cio")
     implementation("io.ktor:ktor-server-core")
