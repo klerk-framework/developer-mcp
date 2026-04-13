@@ -131,7 +131,7 @@ Every command that mutates state is recorded. The event log can be queried via `
 
 ### Read the documentation
 If your task is in any way related to Klerk you should use the tool '$getDocumentation' and ask for one or more topic. The available topics are:
-${DocumentationResource.entries.map { "- ${it.uri}\n" } }
+${DocumentationResource.entries.map { "- ${it.uri}\n" } }. The documentation is also available as mcp-resources.
 
 ### Generating code
 When developing the configuration, you will most likely create at least one function and then put a reference to that function in the configuration. It 

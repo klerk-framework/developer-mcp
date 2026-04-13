@@ -60,7 +60,7 @@ data class Book(
 Note that all references must be a ModelID<T>, List<ModelID<T>> or Set<ModelID<T>>, so in this case it is not 
 possible for a model to have a field of type Author.
 
-The data classes can have custom validation by overriding validators, e.g.:
+The data classes can have custom validation by extending Validatable and overriding validators, e.g.:
 ```kotlin
 override fun validators(): Set<() -> PropertyCollectionValidity> = setOf(::noAuthorCanBeNamedJamesClavell)
 ```
