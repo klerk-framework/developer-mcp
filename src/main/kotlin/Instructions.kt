@@ -1,6 +1,6 @@
 package dev.klerkframework.devmcp
 
-import dev.klerkframework.devmcp.tool.DocumentationResource
+import dev.klerkframework.devmcp.tool.DocumentationSource
 import dev.klerkframework.devmcp.tool.describeErrorCode
 import dev.klerkframework.devmcp.tool.getDocumentation
 
@@ -15,7 +15,7 @@ You are assisting a developer who is building a system using the **Klerk framewo
 A **model** is a data class that represents a domain entity (e.g. `Author`, `Book`). Models are managed by Klerk and always have an associated state. 
 Model properties must be wrapped in user defined classes that extends **DataContainer** subclasses (e.g. `StringContainer`, `IntContainer`, `BooleanContainer`), never plain Kotlin types. This enables built-in validation, authorization, and UI labelling.
 
-Use the resource ${DocumentationResource.Models.uri} to access documentation about models.
+Use the resource ${DocumentationSource.Models.uri} to access documentation about models.
 
 ### State Machines
 Every model type has a **state machine** that defines its lifecycle. A state machine has:
@@ -131,7 +131,7 @@ Every command that mutates state is recorded. The event log can be queried via `
 
 ### Read the documentation
 If your task is in any way related to Klerk you should use the tool '$getDocumentation' and ask for one or more topic. The available topics are:
-${DocumentationResource.entries.map { "- ${it.uri}\n" } }. The documentation is also available as mcp-resources.
+${documentationResources.map { "- ${it.uri}\n" } }. The documentation is also available as mcp-resources.
 
 ### Generating code
 When developing the configuration, you will most likely create at least one function and then put a reference to that function in the configuration. It 
@@ -144,5 +144,16 @@ When developing the configuration, you will most likely create at least one func
 ### Runtime errors
 If a problem occurs in Klerk, Klerk will typically throw an error and provide an error code like this: [ERROR-CONFIG-2]. 
 You can use the tool $describeErrorCode to get a description of the error and how to fix it.
+
+## Default stack
+
+The software stack should be described in README.md. If it is not mentioned there nor in the prompt, you should propose to build
+a server-side rendered multi-page web application using these components:
+
+* SQLite
+* Klerk
+* Klerk-web
+* Ktor
+* HTMX
 
 """.trimIndent()

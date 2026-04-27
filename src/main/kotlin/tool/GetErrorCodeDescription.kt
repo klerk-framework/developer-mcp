@@ -20,6 +20,7 @@ fun addToolDescribeErrorCode(mcpServer: Server) {
     mcpServer.addTool(
         name = describeErrorCode,
         description = "Describes a Klerk error code.",
+        toolAnnotations = readOnly,
         inputSchema = ToolSchema(
             properties = buildJsonObject {
                 put(errorCode, buildJsonObject {

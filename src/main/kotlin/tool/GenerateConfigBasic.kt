@@ -16,6 +16,7 @@ fun addToolGenerateBasicConfig(mcpServer: Server) {
     mcpServer.addTool(
         name = generateBasicConfig,
         description = "Generates code for a basic configuration.",
+        toolAnnotations = readOnly,
         inputSchema = ToolSchema(
             properties = buildJsonObject {
                 put(modelName, buildJsonObject {

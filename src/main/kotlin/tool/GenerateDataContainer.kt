@@ -2,8 +2,6 @@ package dev.klerkframework.devmcp.tool
 
 import dev.klerkframework.devmcp.CodeSnippet
 import dev.klerkframework.devmcp.json
-import dev.klerkframework.klerk.datatypes.IntContainer
-import dev.klerkframework.klerk.datatypes.LongContainer
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
@@ -25,6 +23,7 @@ fun addToolGenerateDataContainer(mcpServer: Server) {
     mcpServer.addTool(
         name = generateDataContainer,
         description = "Generates code for a new data container that can be used in models or event parameters.",
+        toolAnnotations = readOnly,
         inputSchema = ToolSchema(
             properties = buildJsonObject {
                 put(dataContainerName, buildJsonObject {

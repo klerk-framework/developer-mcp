@@ -47,3 +47,9 @@ In IntellJ -> Settings -> Junie -> MCP settings:
   }
 }
 ```
+
+## Testing
+To test the MCP server:
+```bash
+npx -y @modelcontextprotocol/inspector --connect http://localhost:3000
+```

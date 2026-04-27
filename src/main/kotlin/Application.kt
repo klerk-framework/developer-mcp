@@ -1,33 +1,33 @@
 package dev.klerkframework.devmcp
 
 import dev.klerkframework.devmcp.tool.*
-import io.ktor.serialization.kotlinx.json.json
-import io.ktor.server.application.install
-import io.ktor.server.cio.CIO
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
-import io.modelcontextprotocol.kotlin.sdk.server.Server
-import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
-import io.modelcontextprotocol.kotlin.sdk.types.Implementation
-import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities
-import io.ktor.utils.io.streams.asInput
-import io.modelcontextprotocol.kotlin.sdk.server.RegisteredResource
-import io.modelcontextprotocol.kotlin.sdk.server.StdioServerTransport
-import io.modelcontextprotocol.kotlin.sdk.server.mcpStatelessStreamableHttp
-import io.modelcontextprotocol.kotlin.sdk.types.McpJson
-import io.modelcontextprotocol.kotlin.sdk.types.ReadResourceResult
-import io.modelcontextprotocol.kotlin.sdk.types.Resource
-import io.modelcontextprotocol.kotlin.sdk.types.TextResourceContents
+import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.application.*
+import io.ktor.server.cio.*
+import io.ktor.server.engine.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.utils.io.streams.*
+import io.modelcontextprotocol.kotlin.sdk.server.*
+import io.modelcontextprotocol.kotlin.sdk.types.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.asSink
 import kotlinx.io.buffered
 import kotlinx.serialization.json.Json
 import mu.KotlinLogging
+import java.nio.file.Files
+import java.nio.file.Path
+import kotlin.io.path.exists
+import kotlin.io.path.walk
 
 private val log = KotlinLogging.logger {}
 
-val documentationContent: Map<DocumentationResource, String> = createDocumentationContent()
+val pathToSources = System.getenv("SOURCES_PATH") ?: error(
+    "The environment variable 'SOURCES_PATH' must be set. " +
+            "It should point to the root of the sources so that mcp can read the /docs in the klerk repositories."
+)
+
+val documentationResources: Set<DocumentationResource> = createDocumentationResources()
 
 fun main() {
 
@@ -65,19 +65,25 @@ fun main() {
 
 fun addResources(mcpServer: Server) {
     mcpServer.addResources(
-        DocumentationResource.entries.map {
-            RegisteredResource(Resource(
-                name = it.lowercaseName,
-                description = it.description,
-                uri = it.uri,
-                size = documentationContent[it]?.length?.toLong(),
-            )) { request ->
-                log.info("Responded with md ${it.file}")
-                ReadResourceResult(listOf(TextResourceContents(
-                    text = documentationContent[it] ?: error("Resource not found: ${it.uri}"),
+        documentationResources.map {
+            RegisteredResource(
+                Resource(
+                    name = it.name,
+                    description = it.description,
                     uri = it.uri,
-                    mimeType = "text/markdown",
-                )))
+                    size = it.mdContent.length.toLong(),
+                )
+            ) { request ->
+                log.info("Responded with resource ${it.uri}")
+                ReadResourceResult(
+                    listOf(
+                        TextResourceContents(
+                            text = it.mdContent,
+                            uri = it.uri,
+                            mimeType = "text/markdown",
+                        )
+                    )
+                )
             }
         }.toList()
     )
@@ -118,14 +124,46 @@ fun startStdio(mcpServer: Server) {
 
 val json = Json { prettyPrint = true }
 
-private fun createDocumentationContent(): Map<DocumentationResource, String> {
-    val result = mutableMapOf<DocumentationResource, String>()
-    DocumentationResource.entries.forEach {
-        val content = object {}.javaClass.getResourceAsStream("/docs/${it.file}")
-            ?.bufferedReader()
-            ?.readText()
-            ?: error("Resource not found: /docs/${it.file}")
-        result[it] = content
+private fun createDocumentationResources(): Set<DocumentationResource> {
+    val result = mutableSetOf<DocumentationResource>()
+    DocumentationSource.entries.forEach { ds ->
+        if (ds.file != null) {
+            val content = object {}.javaClass.getResourceAsStream("/docs/${ds.file}")
+                ?.bufferedReader()
+                ?.readText()
+                ?: error("Resource not found: /docs/${ds.file}")
+            result.add(DocumentationResource(ds.name, ds.category, ds.description, content, ds.uri))
+        } else if (ds.pathToDocs != null) {
+            val path = Path.of("$pathToSources/${ds.pathToDocs}")
+            check(path.exists()) { "Path to docs does not exist: $path" }
+            path.walk().forEach { path ->
+                val content = Files.readString(path)
+                val nameFromFilename = path.fileName.toString().lowercase().replace(".md", "")
+                val uri = "/docs/${ds.category.name.lowercase()}/$nameFromFilename"
+                result.add(
+                    DocumentationResource(
+                        "${ds.name}-$nameFromFilename",
+                        ds.category,
+                        "Docs about $nameFromFilename in ${ds.lowercaseName}",
+                        content,
+                        uri
+                    )
+                )
+            }
+        } else {
+            error("Documentation source ${ds.name} must have either a file or a pathToDocs")
+        }
     }
+    println("Added ${result.size} documentation resources:")
+    result.forEach { println(it.uri) }
     return result
+}
+
+data class DocumentationResource(
+    val name: String,
+    val category: DocumentationCategory,
+    val description: String,
+    val mdContent: String,
+    val uri: String,
+) {
 }

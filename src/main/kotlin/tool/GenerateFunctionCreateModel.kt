@@ -8,7 +8,10 @@ import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.put
 
 private const val FUNCTION_NAME = "function_name"
 
@@ -25,7 +28,8 @@ const val generateFunctionCreateModel = "${generateFunctionNamePrefix}create_mod
 fun addToolGenerateFunctionCreateModel(mcpServer: Server) {
     mcpServer.addTool(
         name = generateFunctionCreateModel,
-        description = "Returns a function with a signature suitable to use in createModel within voidState in a state machine. ",
+        description = "Returns a function with a signature suitable to use in createModel within voidState in a state machine.",
+        toolAnnotations = readOnly,
         inputSchema = ToolSchema(
             properties = buildJsonObject {
 /*                put(FUNCTION_NAME, buildJsonObject {
@@ -55,16 +59,16 @@ fun addToolGenerateFunctionCreateModel(mcpServer: Server) {
 
                  */
             },
-          //  required = listOf(FUNCTION_NAME, IN_VOID_STATE, MODEL_NAME, PARAMETER_CLASS_NAME)
+            //  required = listOf(FUNCTION_NAME, IN_VOID_STATE, MODEL_NAME, PARAMETER_CLASS_NAME)
             required = listOf(modelName, HAS_PARAMETERS)
         )
     ) { request ->
         val modelName = request.arguments?.get(modelName)?.jsonPrimitive?.content ?: ""
         val hasParameters = request.arguments?.get(HAS_PARAMETERS)?.jsonPrimitive?.booleanOrNull ?: false
-/*        val functionName = request.arguments?.get(FUNCTION_NAME)?.jsonPrimitive?.content ?: ""
-        val inVoidState = request.arguments?.get(IN_VOID_STATE)?.jsonPrimitive?.booleanOrNull ?: false
-        val parameterClassName = request.arguments?.get(PARAMETER_CLASS_NAME)?.jsonPrimitive?.content ?: ""
- */
+        /*        val functionName = request.arguments?.get(FUNCTION_NAME)?.jsonPrimitive?.content ?: ""
+                val inVoidState = request.arguments?.get(IN_VOID_STATE)?.jsonPrimitive?.booleanOrNull ?: false
+                val parameterClassName = request.arguments?.get(PARAMETER_CLASS_NAME)?.jsonPrimitive?.content ?: ""
+         */
         //generateFunctionCreateModel(modelName, parameterClassName, inVoidState, functionName)
         generateFunctionCreateModel(modelName, hasParameters)
     }
@@ -74,7 +78,7 @@ fun generateFunctionCreateModel(
     maybeLowerCaseModelName: String,
     hasParameters: Boolean,
 //    parameterClassName: String,
-  //  inVoidState: Boolean,
+    //  inVoidState: Boolean,
     //functionName: String
 ): CallToolResult {
     val modelName = capFirstLetter(maybeLowerCaseModelName)

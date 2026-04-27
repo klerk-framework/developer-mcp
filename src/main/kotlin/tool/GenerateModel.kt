@@ -16,6 +16,7 @@ fun addToolGenerateModel(mcpServer: Server) {
     mcpServer.addTool(
         name = generateModel,
         description = "Generates code for a new model.",
+        toolAnnotations = readOnly,
         inputSchema = ToolSchema(
             properties = buildJsonObject {
                 put(modelName, buildJsonObject {
@@ -91,7 +92,7 @@ fun addToolGenerateModel(mcpServer: Server) {
                 "import dev.klerkframework.klerk.*",
                 "import dev.klerkframework.klerk.statemachine.StateMachine",
                 "import dev.klerkframework.klerk.statemachine.stateMachine",
-                ),
+            ),
             instructions = "Put this code in a file named '$model.kt' in the package 'models'. Make sure the provided imports are in the file."
         )
         CallToolResult(content = listOf(TextContent(json.encodeToString(generateModelSnippet))))
