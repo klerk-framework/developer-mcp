@@ -35,6 +35,7 @@ fun addToolGenerateModel(mcpServer: Server) {
             request.arguments?.get(modelName)?.jsonPrimitive?.content?.replaceFirstChar { it.uppercaseChar() } ?: error(
                 "No $modelName provided"
             )
+        check(model.isPascalCase()) { "Model name must be in PascalCase" }
         val dataContainer =
             request.arguments?.get(dataContainerName)?.jsonPrimitive?.content?.replaceFirstChar { it.uppercaseChar() }
                 ?: error("No $dataContainerName provided")
@@ -97,4 +98,8 @@ fun addToolGenerateModel(mcpServer: Server) {
         )
         CallToolResult(content = listOf(TextContent(json.encodeToString(generateModelSnippet))))
     }
+}
+
+private fun String.isPascalCase(): Boolean {
+    return matches(Regex("^[A-Z][a-zA-Z0-9]*$"))
 }

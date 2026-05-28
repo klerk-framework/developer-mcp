@@ -1,13 +1,20 @@
 # Klerk Developer MCP
 
-This is an MCP that improves the developer experience when using AI to build systems with the Klerk framework. 
+This is an MCP that improves the developer experience when using AI to build systems with the Klerk framework.
 
 ## Build
+
 ```bash
 ./gradlew build
 ```
 
 ## How to use
+
+The MCP reads the /docs folders in related klerk repositories and provides these as resources. It is
+therefore necessary to
+
+* clone the related repositories (e.g. klerk-web)
+* provide the environment variable SOURCES_PATH so that it knows where to find the repositories.
 
 The MCP server can be started in two ways. STDIO is the recommended way.
 
@@ -30,7 +37,9 @@ In IntellJ -> Settings -> Junie -> MCP settings:
 ```
 
 ### Streamable HTTP
-This mode is preferred when developing this MCP server itself. This allows you to log and set breakpoints to see how the MCP is used.
+
+This mode is preferred when developing this MCP server itself. This allows you to log and set breakpoints to see how the
+MCP is used.
 
 Set the environment variable `KLERK_MCP_PORT` to the port you want to use (3000 in this case) and start the server.
 
@@ -49,7 +58,9 @@ In IntellJ -> Settings -> Junie -> MCP settings:
 ```
 
 ## Testing
+
 To test the MCP server:
+
 ```bash
 npx -y @modelcontextprotocol/inspector --connect http://localhost:3000
 ```

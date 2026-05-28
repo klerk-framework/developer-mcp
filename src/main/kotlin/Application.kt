@@ -1,11 +1,14 @@
 package dev.klerkframework.devmcp
 
 import dev.klerkframework.devmcp.tool.*
+import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
 import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import io.ktor.utils.io.streams.*
 import io.modelcontextprotocol.kotlin.sdk.server.*
 import io.modelcontextprotocol.kotlin.sdk.types.*
@@ -28,6 +31,8 @@ val pathToSources = System.getenv("SOURCES_PATH") ?: error(
 )
 
 val documentationResources: Set<DocumentationResource> = createDocumentationResources()
+
+// TODO: AI hade svårt att förstå att en bakgrundstråd skulle använda Ctx.system(). Det borde dokumenteras i klerk/docs?
 
 fun main() {
 
@@ -94,6 +99,9 @@ fun startHttp(mcpServer: Server, port: Int) {
     embeddedServer(CIO, port = port) {
         install(ContentNegotiation) {
             json(McpJson)
+        }
+        routing {
+            get("/mcp") { call.respondText(helloHtmlResponse(port), ContentType.Text.Html) }
         }
         mcpStatelessStreamableHttp {
             mcpServer
@@ -167,3 +175,31 @@ data class DocumentationResource(
     val uri: String,
 ) {
 }
+
+private fun helloHtmlResponse(port: Int) = """
+    <html>
+        <head>
+            <title>MCP Server</title>
+        </head>
+        <body>
+            <h1>Klerk developer MCP server</h1>
+            <p>You cannot interact with this MCP with a browser, you should instead use a MCP client. The server is running on port $port. 
+            <p>In IntellJ → Settings → Junie → MCP settings:
+            <p>
+            <pre>
+            <code>
+{
+  "mcpServers": {
+    "klerk-dev": {
+      "type": "streamable-http",
+      "url": "http://localhost:$port/mcp",
+      "note": "For Streamable HTTP connections, add this URL directly in your MCP Client"
+    }
+  }
+}
+</code></pre>
+            <p>For exploration, you can try:</p>
+          <p><code>npx -y @modelcontextprotocol/inspector --connect http://localhost:$port</code>
+        </body>
+    </html>
+"""
