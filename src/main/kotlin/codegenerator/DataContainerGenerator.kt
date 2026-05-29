@@ -103,7 +103,7 @@ private const val instructions =
 
 abstract class DataContainerType(val name: String, val nullable: Boolean) {
     abstract fun asClass(): String
-    fun asProperty() = "val ${name.replaceFirstChar { it.lowercase() }}: ${name.replaceFirstChar { it.uppercase() }}${if (nullable) "?" else ""}},"
+    fun asProperty() = "val ${name.replaceFirstChar { it.lowercase() }}: ${name.replaceFirstChar { it.uppercase() }}${if (nullable) "?" else ""},"
     abstract fun imports(): Set<String>
 
 }

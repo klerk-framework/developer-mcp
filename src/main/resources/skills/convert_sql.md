@@ -4,7 +4,8 @@ description: Create Klerk models by inspecting a SQL database.
 ---
 
 # Convert from SQL
-Can generate Klerk models from an existing SQL database (mariadb, postgres, mysql).
+Can generate Klerk models from an existing SQL database (mariadb, mysql). It creates simple "Create, Update, Delete" models, which can be
+a good starting point for a Klerk project.
 
 ## When to use
 If the task is to convert an existing SQL-based application to Klerk, this skill can be used. Typically only used in the beginning of a project.
@@ -47,3 +48,6 @@ Create a Klerk model using the `generate_model` tool. The tool takes the followi
 There may be references to models that have not been created yet, so don't check that the code compiles until you have created all models.
 
 Repeat until all tables have been converted.
+
+## Converting SQL types to Klerk types
+

@@ -59,7 +59,10 @@ fun main() {
     addToolGenerateModel(mcpServer)
     //addToolGenerateModelFromTableSchema(mcpServer)
     addToolGenerateDataContainer(mcpServer)
+    addToolListSkills(mcpServer)
+    addToolGetSkill(mcpServer)
     addResources(mcpServer)
+    addSkillResources(mcpServer)
 
     if (port != null) {
         startHttp(mcpServer, port)

@@ -3,6 +3,8 @@ package dev.klerkframework.devmcp
 import dev.klerkframework.devmcp.tool.DocumentationSource
 import dev.klerkframework.devmcp.tool.describeErrorCode
 import dev.klerkframework.devmcp.tool.getDocumentation
+import dev.klerkframework.devmcp.tool.getSkill
+import dev.klerkframework.devmcp.tool.listSkills
 
 fun provideInstructions() = """
 # Klerk Framework — MCP Instructions
@@ -132,6 +134,9 @@ Every command that mutates state is recorded. The event log can be queried via `
 ### Read the documentation
 If your task is in any way related to Klerk you should use the tool '$getDocumentation' and ask for one or more topic. The available topics are:
 ${documentationResources.map { "- ${it.uri}\n" } }. The documentation is also available as mcp-resources.
+
+### Use skills for focused tasks
+Skills are short playbooks for specific Klerk tasks (e.g. converting a SQL schema to Klerk models). Before starting a task, call '$listSkills' to see whether any skill matches what you are about to do. If one looks relevant, call '$getSkill' to read its full content and follow it. Skills are also available as mcp-resources under `/skills/<name>`.
 
 ### Generating code
 When developing the configuration, you will most likely create at least one function and then put a reference to that function in the configuration. It 

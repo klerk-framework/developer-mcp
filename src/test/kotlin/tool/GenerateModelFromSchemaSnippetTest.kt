@@ -11,6 +11,7 @@ class GenerateModelFromSchemaSnippetTest {
         val snippet = generateWholeModel(
             "Book", listOf(
                 StringContainerType("Title", false, 1, 100, 1),
+                StringContainerType("SubTitle", false, 1, 100, 1),
             )
         )
         println(snippet)
