@@ -1,16 +1,17 @@
 package dev.klerkframework.devmcp.tool
 
 import dev.klerkframework.devmcp.CodeSnippet
+import dev.klerkframework.devmcp.codegenerator.ContainerType
+import dev.klerkframework.devmcp.codegenerator.StringContainerType
 import dev.klerkframework.devmcp.json
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.put
+import kotlinx.serialization.json.*
 
 const val generateModel = "generate_model"
+private const val properties = "properties"
 
 fun addToolGenerateModel(mcpServer: Server) {
     mcpServer.addTool(
@@ -23,9 +24,35 @@ fun addToolGenerateModel(mcpServer: Server) {
                     put("type", "string")
                     put("description", "The name of the model that should be generated.")
                 })
-                put(dataContainerName, buildJsonObject {
-                    put("type", "string")
-                    put("description", "The name of an existing data container that should be used in the model.")
+                put(properties, buildJsonObject {
+                    put("type", "array")
+                    put("description", "The properties of the model.")
+                    put("items", buildJsonObject {
+                        put("type", "object")
+                        put("property", buildJsonObject {
+                            put("name", buildJsonObject { put("type", "string") })
+                            put("type", buildJsonObject {
+                                put("type", "string")
+                                put(
+                                    "description",
+                                    "The type that the data container should contain. One of: $dataContainerTypeOptions"
+                                )
+                            })
+                            put("nullable", buildJsonObject { put("type", "boolean") })
+                            put("model_reference", buildJsonObject {
+                                put("type", "string")
+                                put(
+                                    "description",
+                                    "If the type is ${ContainerType.ModelReference.name}, this should be the name of the referenced model"
+                                )
+                            })
+                        })
+                        put("required", buildJsonArray {
+                            add("name")
+                            add("type")
+                            add("nullable")
+                        })
+                    })
                 })
             },
             required = listOf(modelName, dataContainerName)
@@ -36,13 +63,39 @@ fun addToolGenerateModel(mcpServer: Server) {
                 "No $modelName provided"
             )
         check(model.isPascalCase()) { "Model name must be in PascalCase" }
-        val dataContainer =
-            request.arguments?.get(dataContainerName)?.jsonPrimitive?.content?.replaceFirstChar { it.uppercaseChar() }
-                ?: error("No $dataContainerName provided")
+
+        val propertiesArray = request.arguments?.get(properties)?.jsonArray
+            ?: error("No $properties provided")
+
+
+        val parsedProperties = propertiesArray
+            .map { element ->
+                val obj = element.jsonObject
+                PropertyDefinition(
+                    name = obj["name"]!!.jsonPrimitive.content,
+                    type = ContainerType.valueOf(obj["type"]!!.jsonPrimitive.content),
+                    nullable = obj["nullable"]!!.jsonPrimitive.boolean,
+                    fkModel = obj["model_reference"]?.jsonPrimitive?.contentOrNull,
+                )
+            }
+            .map { pd ->
+                when (pd.type) {
+                    ContainerType.String -> StringContainerType(pd.name, pd.nullable, 0, 1000, 1)
+                    ContainerType.Int -> TODO()
+                    ContainerType.Long -> TODO()
+                    ContainerType.Float -> TODO()
+                    ContainerType.Boolean -> TODO()
+                    ContainerType.GeoPosition -> TODO()
+                    ContainerType.Duration -> TODO()
+                    ContainerType.Instant -> TODO()
+                    ContainerType.ModelReference -> TODO()
+                }
+            }
+
         val generateModelSnippet = CodeSnippet(
             code = """
             data class ${model}(
-                val ${dataContainer.lowercase()}: $dataContainer,
+                ${parsedProperties.map { it.asProperty() }.joinToString(",\n") { it.trimIndent() }}
             )
             
             enum class ${model}States {
@@ -103,3 +156,11 @@ fun addToolGenerateModel(mcpServer: Server) {
 private fun String.isPascalCase(): Boolean {
     return matches(Regex("^[A-Z][a-zA-Z0-9]*$"))
 }
+
+
+private data class PropertyDefinition(
+    val name: String,
+    val type: ContainerType,
+    val nullable: Boolean,
+    val fkModel: String?,
+)

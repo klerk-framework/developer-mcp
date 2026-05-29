@@ -6,7 +6,7 @@ val kotlin_logging_version: String by project
 val klerkVersion: String by project
 
 plugins {
-    kotlin("jvm") version "2.3.10"
+    kotlin("jvm") version "2.3.21"
     id("io.ktor.plugin") version "3.2.3" // "3.4.0" // "3.0.3"
     kotlin("plugin.serialization") version "2.3.10"
 }

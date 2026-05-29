@@ -1,0 +1,49 @@
+---
+name: convert-from-sql
+description: Create Klerk models by inspecting a SQL database.
+---
+
+# Convert from SQL
+Can generate Klerk models from an existing SQL database (mariadb, postgres, mysql).
+
+## When to use
+If the task is to convert an existing SQL-based application to Klerk, this skill can be used. Typically only used in the beginning of a project.
+
+## How to use
+Connect to the database and find the relevant tables in the database. You may have to ask if all tables should be converted or only some.
+
+For each table, execute this query (replace <database> and <table name>):
+```sql
+SELECT
+c.TABLE_NAME,
+c.COLUMN_NAME,
+c.DATA_TYPE,
+c.IS_NULLABLE,
+c.COLUMN_DEFAULT,
+c.CHARACTER_MAXIMUM_LENGTH,
+rc.REFERENCED_TABLE_NAME
+FROM information_schema.COLUMNS c
+LEFT JOIN information_schema.KEY_COLUMN_USAGE kcu
+ON  kcu.TABLE_SCHEMA  = c.TABLE_SCHEMA
+AND kcu.TABLE_NAME    = c.TABLE_NAME
+AND kcu.COLUMN_NAME   = c.COLUMN_NAME
+AND kcu.REFERENCED_TABLE_NAME IS NOT NULL
+LEFT JOIN information_schema.REFERENTIAL_CONSTRAINTS rc
+ON  rc.CONSTRAINT_SCHEMA = kcu.CONSTRAINT_SCHEMA
+AND rc.CONSTRAINT_NAME   = kcu.CONSTRAINT_NAME
+AND rc.TABLE_NAME        = kcu.TABLE_NAME
+WHERE c.TABLE_SCHEMA = '<database>' and c.TABLE_NAME = '<table name>'
+ORDER BY c.ORDINAL_POSITION;
+```
+
+Create a Klerk model using the `generate_model` tool. The tool takes the following arguments:
+* model_name: use TABLE_NAME as the model name (PascalCase)
+* properties: a list of properties to create. Each property is a comma-separated list of the following:
+  * name: COLUMN_NAME (camelCase)
+  * type: see below how to convert a SQL type to a Klerk type
+  * nullable: IS_NULLABLE
+  * model_reference: use REFERENCED_TABLE_NAME (PascalCase) or null if the type is not a reference to another model
+
+There may be references to models that have not been created yet, so don't check that the code compiles until you have created all models.
+
+Repeat until all tables have been converted.

@@ -57,6 +57,7 @@ fun main() {
     addToolGenerateFunctionCreateModel(mcpServer)
     addToolGenerateBasicConfig(mcpServer)
     addToolGenerateModel(mcpServer)
+    //addToolGenerateModelFromTableSchema(mcpServer)
     addToolGenerateDataContainer(mcpServer)
     addResources(mcpServer)
 
@@ -78,19 +79,23 @@ fun addResources(mcpServer: Server) {
                     uri = it.uri,
                     size = it.mdContent.length.toLong(),
                 )
-            ) { request ->
-                log.info("Responded with resource ${it.uri}")
-                ReadResourceResult(
-                    listOf(
-                        TextResourceContents(
-                            text = it.mdContent,
-                            uri = it.uri,
-                            mimeType = "text/markdown",
-                        )
-                    )
-                )
+            ) { _ ->
+                readDocumentationResource(it)
             }
         }.toList()
+    )
+}
+
+private fun readDocumentationResource(resource: DocumentationResource): ReadResourceResult {
+    log.info("Responded with resource ${resource.uri}")
+    return ReadResourceResult(
+        listOf(
+            TextResourceContents(
+                text = resource.mdContent,
+                uri = resource.uri,
+                mimeType = "text/markdown",
+            )
+        )
     )
 }
 
