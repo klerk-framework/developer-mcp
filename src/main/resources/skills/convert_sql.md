@@ -43,11 +43,24 @@ Create a Klerk model using the `generate_model` tool. The tool takes the followi
   * name: COLUMN_NAME (camelCase)
   * type: see below how to convert a SQL type to a Klerk type
   * nullable: IS_NULLABLE
+  * default_value: COLUMN_DEFAULT
   * model_reference: use REFERENCED_TABLE_NAME (PascalCase) or null if the type is not a reference to another model
 
 There may be references to models that have not been created yet, so don't check that the code compiles until you have created all models.
 
 Repeat until all tables have been converted.
 
+Note that when you are done, there will only be basic "Create, Update, Delete" models. As the next step you probably should
+ask the developer if you should proceed and examine the old applicaiton code to extract more information and update
+the klerk models, validation rules etc. 
+
 ## Converting SQL types to Klerk types
 
+## Special cases
+Created_at/updated_at columns should be ignored as Klerk provides the corresponding functionality.
+
+Soft-delete columns should be ignored, and you should instead first proceed and create the model. When the model exists,
+you can model the soft-delete functionality by adding a "deleted" state in the model's state machine.
+
+## Data migration
+Data migration is not something that this MCP can 

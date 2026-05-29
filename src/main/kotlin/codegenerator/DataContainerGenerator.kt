@@ -1,97 +1,15 @@
 package dev.klerkframework.devmcp.codegenerator
 
 import dev.klerkframework.devmcp.CodeSnippet
+import dev.klerkframework.devmcp.tool.PropertyDefinition
+import kotlin.time.Duration
+import kotlin.time.Instant
 
-fun generateDataContainerSnippet(dataContainerName: String, type: ContainerType): CodeSnippet =
-    when (type) {
-        ContainerType.String -> CodeSnippet(
-            code = """
-                class $dataContainerName(value: String) : StringContainer(value) {
-                    override val minLength = 1
-                    override val maxLength = 100
-                    override val maxLines = 1
-                }
-            """.trimIndent(),
-            imports = listOf("dev.klerkframework.klerk.datatypes.StringContainer"),
-            instructions = instructions
-        )
-
-        ContainerType.Int -> CodeSnippet(
-            code = """
-                class $dataContainerName(value: Int) : IntContainer(value) {
-                    override val min = 0
-                    override val max = Int.MAX_VALUE
-                }
-            """.trimIndent(),
-            imports = listOf("dev.klerkframework.klerk.datatypes.IntContainer"),
-            instructions = instructions
-        )
-
-        ContainerType.Long -> CodeSnippet(
-            code = """
-                class $dataContainerName(value: Long) : LongContainer(value) {
-                    override val min = 0L
-                    override val max = Long.MAX_VALUE
-                }
-            """.trimIndent(),
-            imports = listOf("dev.klerkframework.klerk.datatypes.LongContainer"),
-            instructions = instructions
-        )
-
-        ContainerType.Float -> CodeSnippet(
-            code = """
-                class $dataContainerName(value: Float) : FloatContainer(value) {
-                    override val min = 0f
-                    override val max = Float.MAX_VALUE
-                }
-            """.trimIndent(),
-            imports = listOf("dev.klerkframework.klerk.datatypes.FloatContainer"),
-            instructions = instructions
-        )
-
-        ContainerType.Boolean -> CodeSnippet(
-            code = """
-                class $dataContainerName(value: Boolean) : BooleanContainer(value)
-            """.trimIndent(),
-            imports = listOf("dev.klerkframework.klerk.datatypes.BooleanContainer"),
-            instructions = instructions
-        )
-
-        ContainerType.GeoPosition -> CodeSnippet(
-            code = """
-                class $dataContainerName(value: GeoPosition) : GeoPositionContainer(value)
-            """.trimIndent(),
-            imports = listOf(
-                "dev.klerkframework.klerk.datatypes.GeoPositionContainer",
-                "dev.klerkframework.klerk.misc.GeoPosition"
-            ),
-            instructions = instructions
-        )
-
-        ContainerType.Duration -> CodeSnippet(
-            code = """
-                class $dataContainerName(value: Duration) : DurationContainer(value)
-            """.trimIndent(),
-            imports = listOf(
-                "dev.klerkframework.klerk.datatypes.DurationContainer",
-                "kotlin.time.Duration"
-            ),
-            instructions = instructions
-        )
-
-        ContainerType.Instant -> CodeSnippet(
-            code = """
-                class $dataContainerName(value: Instant) : InstantContainer(value)
-            """.trimIndent(),
-            imports = listOf(
-                "dev.klerkframework.klerk.datatypes.InstantContainer",
-                "kotlin.time.Instant"
-            ),
-            instructions = instructions
-        )
-
-        ContainerType.ModelReference -> TODO()
-    }
+fun generateDataContainers(properties: Set<DataContainerType>): CodeSnippet {
+    val imports = properties.flatMap { it.dataTypeImports() }.toSet()
+    val code = properties.map { it.asClass() }.joinToString("\n\n")
+    return CodeSnippet(code, imports.toList(), instructions)
+}
 
 enum class ContainerType {
     String, Int, Long, Float, Boolean, GeoPosition, Duration, Instant, ModelReference,
@@ -103,20 +21,134 @@ private const val instructions =
 
 abstract class DataContainerType(val name: String, val nullable: Boolean) {
     abstract fun asClass(): String
-    fun asProperty() = "val ${name.replaceFirstChar { it.lowercase() }}: ${name.replaceFirstChar { it.uppercase() }}${if (nullable) "?" else ""},"
-    abstract fun imports(): Set<String>
-
+    fun asProperty(): String {
+        return if (this is ModelReferenceType) {
+            "val ${name.replaceFirstChar { it.lowercase() }}: ModelID<${this.fkModel}>"
+        } else {
+            "val ${name.replaceFirstChar { it.lowercase() }}: ${name.replaceFirstChar { it.uppercase() }}${if (nullable) "?" else ""},"
+        }
+    }
+    abstract fun dataTypeImports(): Set<String>
 }
 
-class StringContainerType(name: String, nullable: Boolean, val minLength: Int, val maxLength: Int, val maxLines: Int) : DataContainerType(name, nullable) {
-    override fun asClass() = """
+class StringContainerType(name: String, nullable: Boolean, val minLength: Int, val maxLength: Int, val maxLines: Int, val recommendedDefault: String?) : DataContainerType(name, nullable) {
+    override fun asClass(): String {
+        val defaultAndEnd = if (recommendedDefault == null) "\n}" else "\n    override val recommendedDefault = \"$recommendedDefault\"\n}"
+        return """
                 class $name(value: String) : StringContainer(value) {
                     override val minLength = $minLength
                     override val maxLength = $maxLength
                     override val maxLines = $maxLines
-                }
-            """.trimIndent()
+                """.trimIndent() + defaultAndEnd
+    }
 
-    override fun imports(): Set<String> = emptySet()
+    override fun dataTypeImports(): Set<String> = setOf("dev.klerkframework.klerk.datatypes.StringContainer")
 }
 
+class IntContainerType(name: String, nullable: Boolean, val min: Int, val max: Int, val recommendedDefault: String?) : DataContainerType(name, nullable) {
+    override fun asClass(): String {
+        val defaultAndEnd = if (recommendedDefault == null) "\n}" else "\n    override val recommendedDefault = $recommendedDefault\n}"
+        return """
+                class $name(value: Ing) : IntContainer(value) {
+                    override val min = $min
+                    override val max = $max
+                """.trimIndent() + defaultAndEnd
+    }
+
+    override fun dataTypeImports(): Set<String> = setOf("dev.klerkframework.klerk.datatypes.IntContainer")
+}
+
+class LongContainerType(name: String, nullable: Boolean, val min: Int, val max: Long, val recommendedDefault: String?) : DataContainerType(name, nullable) {
+    override fun asClass(): String {
+        val defaultAndEnd = if (recommendedDefault == null) "}" else "\n    override val recommendedDefault = $recommendedDefault\n}"
+        return """
+                class $name(value: Long) : LongContainer(value) {
+                    override val min = $min
+                    override val max = $max
+                """.trimIndent() + defaultAndEnd
+    }
+
+    override fun dataTypeImports(): Set<String> = setOf("dev.klerkframework.klerk.datatypes.LongContainer")
+}
+
+class FloatContainerType(name: String, nullable: Boolean, val min: Float, val max: Float, val recommendedDefault: String?) : DataContainerType(name, nullable) {
+    override fun asClass(): String {
+        val defaultAndEnd = if (recommendedDefault == null) "}" else "\n    override val recommendedDefault = ${recommendedDefault.toFloat()}\n}"
+        return """
+                class $name(value: Float) : FloatContainer(value) {
+                    override val min = $min
+                    override val max = $max
+                """.trimIndent() + defaultAndEnd
+    }
+
+    override fun dataTypeImports(): Set<String> = setOf("dev.klerkframework.klerk.datatypes.FloatContainer")
+}
+
+class BooleanContainerType(name: String, nullable: Boolean, val recommendedDefault: String?) : DataContainerType(name, nullable) {
+    override fun asClass(): String {
+        val defaultAndEnd = if (recommendedDefault == null) "}" else "\n    override val recommendedDefault = ${recommendedDefault.toBoolean()}\n}"
+        return """
+                class $name(value: Boolean) : BooleanContainer(value) {
+                """.trimIndent() + defaultAndEnd
+    }
+
+    override fun dataTypeImports(): Set<String> = setOf("dev.klerkframework.klerk.datatypes.BooleanContainer")
+}
+
+class DurationContainerType(name: String, nullable: Boolean, val min: Duration, val max: Duration?, val recommendedDefault: String?) : DataContainerType(name, nullable) {
+    override fun asClass(): String {
+        val defaultAndEnd = if (recommendedDefault == null) "}" else "\n    override val recommendedDefault = ${Duration.parse(recommendedDefault).toIsoString()}\n}"
+        return """
+                class $name(value: Duration) : DurationContainer(value) {
+                    override val min = $min
+                    override val max = TODO()
+                """.trimIndent() + defaultAndEnd
+    }
+
+    override fun dataTypeImports(): Set<String> = 
+        setOf("dev.klerkframework.klerk.datatypes.DurationContainer", "kotlin.time.Duration")
+}
+
+class InstantContainerType(name: String, nullable: Boolean, val min: Instant, val max: Instant?, val recommendedDefault: String?) : DataContainerType(name, nullable) {
+    override fun asClass(): String {
+        val defaultAndEnd = if (recommendedDefault == null) "}" else "\n    override val recommendedDefault = TODO()}\n}"
+        return """
+                class $name(value: Instant) : InstantContainer(value) {
+                    override val min = $min
+                    override val max = TODO()
+                """.trimIndent() + defaultAndEnd
+    }
+
+    override fun dataTypeImports(): Set<String> =
+        setOf("dev.klerkframework.klerk.datatypes.InstantContainer", "kotlin.time.Instant")
+}
+
+
+class GeoPositionContainerType(name: String, nullable: Boolean, val recommendedDefault: String?) : DataContainerType(name, nullable) {
+    override fun asClass(): String {
+        val defaultAndEnd = if (recommendedDefault == null) "}" else "\n    override val recommendedDefault = TODO()\n}"
+        return """
+                class $name(value: GeoPosition) : GeoPositionContainer(value) {
+                """.trimIndent() + defaultAndEnd
+    }
+
+    override fun dataTypeImports(): Set<String> = setOf("dev.klerkframework.klerk.datatypes.GeoPositionContainer", "dev.klerkframework.klerk.misc.GeoPosition")
+}
+
+class ModelReferenceType(name: String, nullable: Boolean, val fkModel: String) : DataContainerType(name, nullable) {
+    override fun asClass(): String = ""
+    override fun dataTypeImports(): Set<String> = setOf("dev.klerkframework.klerk.misc.ModelID")
+}
+
+fun toDataContainerType(pd: PropertyDefinition) =
+    when (pd.type) {
+        ContainerType.String -> StringContainerType(pd.name, pd.nullable, 0, 1000, 1, pd.defaultValue)
+        ContainerType.Int -> IntContainerType(pd.name, pd.nullable, 0, Int.MAX_VALUE, pd.defaultValue)
+        ContainerType.Long -> LongContainerType(pd.name, pd.nullable, 0, Long.MAX_VALUE, pd.defaultValue)
+        ContainerType.Float -> FloatContainerType(pd.name, pd.nullable, 0f, Float.MAX_VALUE, pd.defaultValue)
+        ContainerType.Boolean -> BooleanContainerType(pd.name, pd.nullable, pd.defaultValue)
+        ContainerType.GeoPosition -> GeoPositionContainerType(pd.name, pd.nullable, pd.defaultValue)
+        ContainerType.Duration -> DurationContainerType(pd.name, pd.nullable, Duration.ZERO, null, pd.defaultValue)
+        ContainerType.Instant -> InstantContainerType(pd.name, pd.nullable, Instant.fromEpochSeconds(0), null, pd.defaultValue)
+        ContainerType.ModelReference -> ModelReferenceType(pd.name, pd.nullable, requireNotNull(pd.fkModel))
+    }

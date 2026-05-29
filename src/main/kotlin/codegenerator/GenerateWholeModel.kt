@@ -1,6 +1,6 @@
 package dev.klerkframework.devmcp.codegenerator
 
-fun generateWholeModel(model: String, properties: List<DataContainerType>): String {
+fun generateWholeModel(model: String, properties: Set<DataContainerType>): String {
     return """
 data class ${model}(
 ${properties.joinToString("\n") { "    ${it.asProperty()}" }}

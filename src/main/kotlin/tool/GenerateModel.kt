@@ -1,17 +1,30 @@
 package dev.klerkframework.devmcp.tool
 
 import dev.klerkframework.devmcp.CodeSnippet
+import dev.klerkframework.devmcp.codegenerator.BooleanContainerType
 import dev.klerkframework.devmcp.codegenerator.ContainerType
+import dev.klerkframework.devmcp.codegenerator.DurationContainerType
+import dev.klerkframework.devmcp.codegenerator.FloatContainerType
+import dev.klerkframework.devmcp.codegenerator.GeoPositionContainerType
+import dev.klerkframework.devmcp.codegenerator.InstantContainerType
+import dev.klerkframework.devmcp.codegenerator.IntContainerType
+import dev.klerkframework.devmcp.codegenerator.LongContainerType
+import dev.klerkframework.devmcp.codegenerator.ModelReferenceType
 import dev.klerkframework.devmcp.codegenerator.StringContainerType
+import dev.klerkframework.devmcp.codegenerator.generateDataContainers
+import dev.klerkframework.devmcp.codegenerator.generateWholeModel
+import dev.klerkframework.devmcp.codegenerator.toDataContainerType
 import dev.klerkframework.devmcp.json
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
 import kotlinx.serialization.json.*
+import kotlin.time.Duration
+import kotlin.time.Instant
 
 const val generateModel = "generate_model"
-private const val properties = "properties"
+const val properties = "properties"
 
 fun addToolGenerateModel(mcpServer: Server) {
     mcpServer.addTool(
@@ -46,6 +59,10 @@ fun addToolGenerateModel(mcpServer: Server) {
                                     "If the type is ${ContainerType.ModelReference.name}, this should be the name of the referenced model"
                                 )
                             })
+                            put("default_value", buildJsonObject {
+                                put("type", "string")
+                                put("description", "The default value for the property. Null if no default value is provided.")
+                            })
                         })
                         put("required", buildJsonArray {
                             add("name")
@@ -67,7 +84,6 @@ fun addToolGenerateModel(mcpServer: Server) {
         val propertiesArray = request.arguments?.get(properties)?.jsonArray
             ?: error("No $properties provided")
 
-
         val parsedProperties = propertiesArray
             .map { element ->
                 val obj = element.jsonObject
@@ -76,80 +92,25 @@ fun addToolGenerateModel(mcpServer: Server) {
                     type = ContainerType.valueOf(obj["type"]!!.jsonPrimitive.content),
                     nullable = obj["nullable"]!!.jsonPrimitive.boolean,
                     fkModel = obj["model_reference"]?.jsonPrimitive?.contentOrNull,
+                    defaultValue = obj["default_value"]?.jsonPrimitive?.contentOrNull
                 )
             }
-            .map { pd ->
-                when (pd.type) {
-                    ContainerType.String -> StringContainerType(pd.name, pd.nullable, 0, 1000, 1)
-                    ContainerType.Int -> TODO()
-                    ContainerType.Long -> TODO()
-                    ContainerType.Float -> TODO()
-                    ContainerType.Boolean -> TODO()
-                    ContainerType.GeoPosition -> TODO()
-                    ContainerType.Duration -> TODO()
-                    ContainerType.Instant -> TODO()
-                    ContainerType.ModelReference -> TODO()
-                }
-            }
-
-        val generateModelSnippet = CodeSnippet(
-            code = """
-            data class ${model}(
-                ${parsedProperties.map { it.asProperty() }.joinToString(",\n") { it.trimIndent() }}
-            )
-            
-            enum class ${model}States {
-                Updatable,
-            }
-            
-            fun create${model}StateMachine(): StateMachine<${model}, ${model}States, Ctx, Collections> =
-                stateMachine {
-            
-                    event(Create${model}) { }
-                    event(Update${model}) { }
-                    event(Delete${model}) { }
-            
-                    voidState {
-                        onEvent(Create${model}) {
-                            createModel(initialState = ${model}States.Updatable, ::create${model})
-                        }
-                    }
-            
-                    state(${model}States.Updatable) {
-                        onEvent(Update${model}) {
-                            update(::update${model})
-                        }
-            
-                        onEvent(Delete${model}) {
-                            delete()
-                        }
-                    }
-            
-                }
-            
-            object Create${model} : VoidEventWithParameters<${model}, ${model}>(${model}::class, EventVisibility.CODE, ${model}::class)
-            
-            object Update${model} : InstanceEventWithParameters<${model}, ${model}>(${model}::class, EventVisibility.CODE, ${model}::class)
-            
-            object Delete${model} : InstanceEventNoParameters<${model}>(${model}::class, EventVisibility.CODE)
-            
-            fun create${model}(args: ArgForVoidEvent<${model}, ${model}, Ctx, Collections>): ${model} {
-                return args.command.params
-            }
-            
-            fun update${model}(args: ArgForInstanceEvent<${model}, ${model}, Ctx, Collections>): ${model} {
-                return args.command.params
-            }
-
-        """.trimIndent(),
+            .map { toDataContainerType(it) }
+            .toSet()
+        val snippets = mutableListOf<CodeSnippet>()
+        snippets.add(CodeSnippet(
+            code = generateWholeModel(modelName, parsedProperties),
             imports = listOf(
                 "import dev.klerkframework.klerk.*",
                 "import dev.klerkframework.klerk.statemachine.StateMachine",
                 "import dev.klerkframework.klerk.statemachine.stateMachine",
             ),
             instructions = "Put this code in a file named '$model.kt' in the package 'models'. Make sure the provided imports are in the file."
-        )
-        CallToolResult(content = listOf(TextContent(json.encodeToString(generateModelSnippet))))
+        ))
+
+        snippets.add(generateDataContainers(parsedProperties))
+
+        CallToolResult(content = snippets.map { TextContent(json.encodeToString(it)) } )
     }
 }
 
@@ -158,9 +119,10 @@ private fun String.isPascalCase(): Boolean {
 }
 
 
-private data class PropertyDefinition(
+data class PropertyDefinition(
     val name: String,
     val type: ContainerType,
     val nullable: Boolean,
     val fkModel: String?,
+    val defaultValue: String?,
 )

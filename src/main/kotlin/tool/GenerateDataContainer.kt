@@ -1,13 +1,20 @@
 package dev.klerkframework.devmcp.tool
 
 import dev.klerkframework.devmcp.codegenerator.ContainerType
-import dev.klerkframework.devmcp.codegenerator.generateDataContainerSnippet
+import dev.klerkframework.devmcp.codegenerator.DataContainerType
+import dev.klerkframework.devmcp.codegenerator.generateDataContainers
+import dev.klerkframework.devmcp.codegenerator.toDataContainerType
 import dev.klerkframework.devmcp.json
+import dev.klerkframework.devmcp.tool.generateDataContainer
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
+import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 
@@ -40,9 +47,20 @@ fun addToolGenerateDataContainer(mcpServer: Server) {
             ?.replaceFirstChar { it.uppercaseChar() } ?: error("No $dataContainerName provided")
         val typeString = request.arguments?.get(dataContainerType)?.jsonPrimitive?.content
             ?: error("No $dataContainerType provided")
+
         val type = ContainerType.entries.find { it.name.equals(typeString, ignoreCase = true) }
             ?: error("Invalid $dataContainerType provided. Expected one of: $dataContainerTypeOptions")
-        CallToolResult(content = listOf(TextContent(json.encodeToString(generateDataContainerSnippet(model, type)))))
+        
+        val pd = PropertyDefinition(
+                    name = model,
+                    type = type,
+                    nullable = false,
+                    fkModel = null,
+                    defaultValue = null
+                )
+            val pdx = setOf(toDataContainerType(pd))
+
+        CallToolResult(content = listOf(TextContent(json.encodeToString(generateDataContainers(pdx)))))
     }
 }
 
