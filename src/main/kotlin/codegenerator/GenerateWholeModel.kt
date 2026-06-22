@@ -10,7 +10,7 @@ enum class ${model}States {
     Updatable,
 }
 
-fun create${model}StateMachine(): StateMachine<${model}, ${model}States, Ctx, Collections> =
+fun create${model}StateMachine(): StateMachine<${model}, ${model}States, Ctx, Views> =
     stateMachine {
 
         event(Create${model}) { }
@@ -41,11 +41,11 @@ object Update${model} : InstanceEventWithParameters<${model}, ${model}>(${model}
 
 object Delete${model} : InstanceEventNoParameters<${model}>(${model}::class, EventVisibility.CODE)
 
-fun create${model}(args: ArgForVoidEvent<${model}, ${model}, Ctx, Collections>): ${model} {
+fun create${model}(args: ArgForVoidEvent<${model}, ${model}, Ctx, Views>): ${model} {
     return args.command.params
 }
 
-fun update${model}(args: ArgForInstanceEvent<${model}, ${model}, Ctx, Collections>): ${model} {
+fun update${model}(args: ArgForInstanceEvent<${model}, ${model}, Ctx, Views>): ${model} {
     return args.command.params
 }"""
 }

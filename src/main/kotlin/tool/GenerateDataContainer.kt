@@ -1,20 +1,14 @@
 package dev.klerkframework.devmcp.tool
 
 import dev.klerkframework.devmcp.codegenerator.ContainerType
-import dev.klerkframework.devmcp.codegenerator.DataContainerType
 import dev.klerkframework.devmcp.codegenerator.generateDataContainers
 import dev.klerkframework.devmcp.codegenerator.toDataContainerType
 import dev.klerkframework.devmcp.json
-import dev.klerkframework.devmcp.tool.generateDataContainer
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
-import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 
@@ -34,11 +28,17 @@ fun addToolGenerateDataContainer(mcpServer: Server) {
             properties = buildJsonObject {
                 put(dataContainerName, buildJsonObject {
                     put("type", "string")
-                    put("description", "The name of the data container that should be generated.")
+                    put(
+                        "description",
+                        "The name of the data container that should be generated. E.g. 'Age' if this DataContainer should be used for a property 'age'."
+                    )
                 })
                 put(dataContainerType, buildJsonObject {
                     put("type", "string")
-                    put("description", "The type that the data container should contain. One of: $dataContainerTypeOptions")
+                    put(
+                        "description",
+                        "The type that the data container should contain. One of: $dataContainerTypeOptions"
+                    )
                 })
             },
         )
@@ -50,15 +50,15 @@ fun addToolGenerateDataContainer(mcpServer: Server) {
 
         val type = ContainerType.entries.find { it.name.equals(typeString, ignoreCase = true) }
             ?: error("Invalid $dataContainerType provided. Expected one of: $dataContainerTypeOptions")
-        
+
         val pd = PropertyDefinition(
-                    name = model,
-                    type = type,
-                    nullable = false,
-                    fkModel = null,
-                    defaultValue = null
-                )
-            val pdx = setOf(toDataContainerType(pd))
+            name = model,
+            type = type,
+            nullable = false,
+            fkModel = null,
+            defaultValue = null
+        )
+        val pdx = setOf(toDataContainerType(pd))
 
         CallToolResult(content = listOf(TextContent(json.encodeToString(generateDataContainers(pdx)))))
     }

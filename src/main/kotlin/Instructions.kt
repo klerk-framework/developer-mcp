@@ -1,10 +1,6 @@
 package dev.klerkframework.devmcp
 
-import dev.klerkframework.devmcp.tool.DocumentationSource
-import dev.klerkframework.devmcp.tool.describeErrorCode
-import dev.klerkframework.devmcp.tool.getDocumentation
-import dev.klerkframework.devmcp.tool.getSkill
-import dev.klerkframework.devmcp.tool.listSkills
+import dev.klerkframework.devmcp.tool.*
 
 fun provideInstructions() = """
 # Klerk Framework — MCP Instructions
@@ -46,8 +42,8 @@ data class CreateAuthorParams(
 ### Authorization
 Authorization is expressed as sets of **positive** and **negative** rule functions. A request is allowed if at least one positive rule allows it and no negative rule denies it.
 
-### Collections / Model Views
-`ModelViews` defines how a model type's instances are organized into queryable collections (e.g. `AllModelView`, custom filtered views). Collections are declared in a data class and passed into `ConfigBuilder`.
+### Model Views
+`ModelViews` defines how a model type's instances are organized into queryable collections (e.g. `AllModelView`, custom filtered views). Views are declared in a data class and passed into `ConfigBuilder`.
 
 ### Configuration
 Everything is wired together in a `Config` built with `ConfigBuilder`. The config declares (among other things):
@@ -86,7 +82,7 @@ Data is read via `klerk.read()` (or `klerk.readSuspend()` for coroutines). All r
 ```kotlin
 val astrid = // some model ID
 val model = klerk.read(context) { get(astrid) }
-val allAuthors = klerk.read(context) { list(collections.authors.all) }
+val allAuthors = klerk.read(context) { list(views.authors.all) }
 ```
 The model contains the properties. Access the underlying value via `.value` (authorization-checked) or `.valueWithoutAuthorization` (bypasses auth, use carefully).
 
@@ -133,7 +129,7 @@ Every command that mutates state is recorded. The event log can be queried via `
 
 ### Read the documentation
 If your task is in any way related to Klerk you should use the tool '$getDocumentation' and ask for one or more topic. The available topics are:
-${documentationResources.map { "- ${it.uri}\n" } }. The documentation is also available as mcp-resources.
+${documentationResources.map { "- ${it.uri}\n" }}. The documentation is also available as mcp-resources.
 
 ### Use skills for focused tasks
 Skills are short playbooks for specific Klerk tasks (e.g. converting a SQL schema to Klerk models). Before starting a task, call '$listSkills' to see whether any skill matches what you are about to do. If one looks relevant, call '$getSkill' to read its full content and follow it. Skills are also available as mcp-resources under `/skills/<name>`.

@@ -1,14 +1,17 @@
 # State Machines
+
 Every model type has a **state machine** that defines its lifecycle. A state machine has:
+
 - A **void state** — handles events that create new model instances (no model exists yet).
 - One or more **instance states** — handle events on existing model instances.
 
-Each state declares which **events** it can handle and what **actions** (executables) to perform: create a model, update it, delete it, transition to another state, or trigger a job.
+Each state declares which **events** it can handle and what **actions** (executables) to perform: create a model, update
+it, delete it, transition to another state, or trigger a job.
 
 ```kotlin
 enum class AuthorStates { Amateur, Professional }
 
-fun authorStateMachine(collections: MyCollections) = stateMachine<Author, AuthorStates, Context, MyCollections> {
+fun authorStateMachine(views: MyViews) = stateMachine<Author, AuthorStates, Context, MyViews> {
     event(CreateAuthor) {
         // validation rules
     }
@@ -24,7 +27,7 @@ fun authorStateMachine(collections: MyCollections) = stateMachine<Author, Author
             transitionTo(Improving)
         }
     }
-    
+
     // other states
 }
 ```

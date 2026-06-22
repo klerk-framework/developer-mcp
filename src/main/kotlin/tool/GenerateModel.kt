@@ -1,16 +1,7 @@
 package dev.klerkframework.devmcp.tool
 
 import dev.klerkframework.devmcp.CodeSnippet
-import dev.klerkframework.devmcp.codegenerator.BooleanContainerType
 import dev.klerkframework.devmcp.codegenerator.ContainerType
-import dev.klerkframework.devmcp.codegenerator.DurationContainerType
-import dev.klerkframework.devmcp.codegenerator.FloatContainerType
-import dev.klerkframework.devmcp.codegenerator.GeoPositionContainerType
-import dev.klerkframework.devmcp.codegenerator.InstantContainerType
-import dev.klerkframework.devmcp.codegenerator.IntContainerType
-import dev.klerkframework.devmcp.codegenerator.LongContainerType
-import dev.klerkframework.devmcp.codegenerator.ModelReferenceType
-import dev.klerkframework.devmcp.codegenerator.StringContainerType
 import dev.klerkframework.devmcp.codegenerator.generateDataContainers
 import dev.klerkframework.devmcp.codegenerator.generateWholeModel
 import dev.klerkframework.devmcp.codegenerator.toDataContainerType
@@ -20,8 +11,6 @@ import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
 import kotlinx.serialization.json.*
-import kotlin.time.Duration
-import kotlin.time.Instant
 
 const val generateModel = "generate_model"
 const val properties = "properties"
@@ -43,7 +32,10 @@ fun addToolGenerateModel(mcpServer: Server) {
                     put("items", buildJsonObject {
                         put("type", "object")
                         put("property", buildJsonObject {
-                            put("name", buildJsonObject { put("type", "string") })
+                            put("name", buildJsonObject {
+                                put("type", "string")
+                                put("description", "The name of the property")
+                            })
                             put("type", buildJsonObject {
                                 put("type", "string")
                                 put(
@@ -61,7 +53,10 @@ fun addToolGenerateModel(mcpServer: Server) {
                             })
                             put("default_value", buildJsonObject {
                                 put("type", "string")
-                                put("description", "The default value for the property. Null if no default value is provided.")
+                                put(
+                                    "description",
+                                    "The default value for the property. Null if no default value is provided."
+                                )
                             })
                         })
                         put("required", buildJsonArray {
@@ -72,7 +67,7 @@ fun addToolGenerateModel(mcpServer: Server) {
                     })
                 })
             },
-            required = listOf(modelName, dataContainerName)
+            required = listOf(modelName, properties)
         )
     ) { request ->
         val model =
@@ -89,7 +84,7 @@ fun addToolGenerateModel(mcpServer: Server) {
                 val obj = element.jsonObject
                 PropertyDefinition(
                     name = obj["name"]!!.jsonPrimitive.content,
-                    type = ContainerType.valueOf(obj["type"]!!.jsonPrimitive.content),
+                    type = ContainerType.valueOf(obj["type"]!!.jsonPrimitive.content.replaceFirstChar { it.uppercaseChar() }),
                     nullable = obj["nullable"]!!.jsonPrimitive.boolean,
                     fkModel = obj["model_reference"]?.jsonPrimitive?.contentOrNull,
                     defaultValue = obj["default_value"]?.jsonPrimitive?.contentOrNull
@@ -98,19 +93,20 @@ fun addToolGenerateModel(mcpServer: Server) {
             .map { toDataContainerType(it) }
             .toSet()
         val snippets = mutableListOf<CodeSnippet>()
-        snippets.add(CodeSnippet(
-            code = generateWholeModel(modelName, parsedProperties),
-            imports = listOf(
-                "import dev.klerkframework.klerk.*",
-                "import dev.klerkframework.klerk.statemachine.StateMachine",
-                "import dev.klerkframework.klerk.statemachine.stateMachine",
-            ),
-            instructions = "Put this code in a file named '$model.kt' in the package 'models'. Make sure the provided imports are in the file."
-        ))
+        snippets.add(
+            CodeSnippet(
+                code = generateWholeModel(model, parsedProperties),
+                imports = listOf(
+                    "import dev.klerkframework.klerk.*",
+                    "import dev.klerkframework.klerk.statemachine.StateMachine",
+                ),
+                instructions = "Put this code in a file named '$model.kt' in the package 'models'. Make sure the provided imports are in the file."
+            )
+        )
 
         snippets.add(generateDataContainers(parsedProperties))
 
-        CallToolResult(content = snippets.map { TextContent(json.encodeToString(it)) } )
+        CallToolResult(content = snippets.map { TextContent(json.encodeToString(it)) })
     }
 }
 

@@ -39,7 +39,7 @@ fun main() {
     val port = System.getenv("KLERK_MCP_PORT")?.toIntOrNull()
     val mcpServer = Server(
         serverInfo = Implementation(
-            name = "example-server",
+            name = "klerk-dev",
             version = "1.0.0",
         ),
         options = ServerOptions(
